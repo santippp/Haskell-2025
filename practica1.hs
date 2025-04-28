@@ -30,3 +30,20 @@ ror xs n = go n xs []
                 go 0 ys acc = ys ++ acc
                 go _ [] acc = acc
                 go i (y:ys) acc = go (i - 1) ys (acc ++ [y])
+
+upto :: Int -> Int -> [Int]
+upto n m | n > m = []
+         | otherwise = go n m []
+          where
+            go n m acc | n <= m = go (n+1) m (acc ++ [n])
+                       | otherwise = acc
+
+eco :: [Char] -> [Char]
+eco xs = go 0 xs []
+        where
+          go _ [] acc = acc
+          go p (x:xs) acc = go (p+1) xs (acc ++ function p x)
+
+function :: Int -> Char -> [Char]
+function 0 a = [a]
+function n a = a : function (n-1) a
