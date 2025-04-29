@@ -142,22 +142,88 @@ balanceado x n =
 member' :: Ord a => a -> a -> Bin a -> Bool
 member' c x Hoja = c == x
 member' c x (Nodo l y r) | x > y = member' c x r
-                      | otherwise = member' y x l
+                         | otherwise = member' y x l
 
 memberprime :: Ord a => a -> Bin a -> Bool
 memberprime x t@(Nodo l c r) = member' c x t
 
 data Color = R | B deriving(Show, Eq)
-data RBT a = E | N Color (RBT a) a (RBT a) deriving(Show)
+data RBT a = E | T Color (RBT a) a (RBT a) deriving(Show)
 
 fromOrdList' :: Ord a => [a] -> Color -> RBT a 
 fromOrdList' [] _ = E 
-fromOrdList' xs c = let m    = div (length xs) 2
-                        x    = xs !! m
+fromOrdList' xs c = let m    = div (length xs) 2 
+                        x    = xs !! m -- x es el elemento ed la mitad de la lista
                         ant  = take m xs
                         post = drop (m+1) xs
-                        c'   = if c == R then B else R
-                        in N c (fromOrdList' ant c') x (fromOrdList' post c')
+                        c'   = if c == R then B else R -- garantiza que se alterne entre negro y rojo
+                        in T c (fromOrdList' ant c') x (fromOrdList' post c')
 
 fromOrdList :: Ord a => [a] -> RBT a
 fromOrdList xs = fromOrdList' xs B
+
+makeBlack :: RBT a -> RBT a
+makeBlack (T _ l x r) = T B l x r
+
+insert :: Ord a => a -> RBT a -> RBT a
+insert x t = makeBlack (ins x t)
+        where ins x E = T R E x E
+              ins x (T c l y r) | x < y = balance c (ins x l) y r
+                                | x > y = balance c l y (ins x r)
+                                | otherwise = T c l y r 
+
+balance :: Color -> RBT a -> a -> RBT a -> RBT a
+balance B (T R (T R a x b) y c) z d = T R (T B a x b) y (T B c z d)
+balance B (T R a x (T R b y c)) z d = T R (T B a x b) y (T B c z d)
+balance B a x (T R (T R b y c) z d) = T R (T B a x b) y (T B c z d)
+balance B a x (T R b y (T R c z d)) = T R (T B a x b) y (T B c z d)
+balance B l y r = T B l y r
+
+lbalance :: RBT a -> a -> RBT a -> RBT a
+labalance (T R (T R a x b) y c) z d = T R (T B a x b) y (T B c z d)
+lbalance (T R a x (T R b y c)) z d = T R (T B a x b) y (T B c z d)
+lbalance l y r = T B l y r
+
+rbalance :: RBT a -> a -> RBT a -> RBT a
+rabalance a x (T R (T R b y c) z d) = T R (T B a x b) y (T B c z d)
+rbalance a x (T R b y (T R c z d)) = T R (T B a x b) y (T B c z d)
+rbalance l y r = T B l y r
+
+insert' :: Ord a => a -> RBT a -> RBT a
+insert' x t = makeBlack (ins x t)
+        where ins x E = T R E x E
+              ins x (T c l y r) | x < y = lbalance (ins x l) y r
+                                | x > y = rbalance l y (ins x r)
+                                | otherwise = T c l y r 
+type Rank = Int
+data Heap a = Em | N Rank a (Heap a) (Heap a) deriving(Show)
+
+rank :: Heap a -> Int
+rank Em = 0
+rank (N r _ _ _) = r
+
+makeH :: a -> Heap a -> Heap a -> Heap a
+makeH x a b = if rank a >= rank b then N (rank b + 1) x a b -- elijo el rango del arbol mas corto, porque ese es el rango del arbol que construyo
+                             else N (rank a + 1) x a b 
+
+merge :: Ord a => Heap a -> Heap a -> Heap a
+merge h1 Em = h1
+merge Em h2 = h2
+merge h1@(N _ x a1 b1) h2@(N _ y a2 b2) = if x <= y then makeH x a1 (merge b1 h2) 
+                                                    else makeH y a2 (merge b2 h1)
+
+convertir :: a -> Heap a
+convertir x = N 1 x Em Em
+
+{- fromlist ::Ord a => [a] -> Heap a
+fromlist [] = Em
+fromlist (x:xs) = merge (convertir x) (fromlist xs) -} -- tiene complejidad O(n log n)
+
+fromlist :: Ord a => [a] -> Heap a
+fromlist xs = fromList' (map convertir xs)
+  where
+    fromList' [] = Em
+    fromList' [h] = h
+    fromList' (h1:h2:hs) = fromList' (merge h1 h2 : hs)
+    
+
