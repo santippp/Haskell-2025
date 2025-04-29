@@ -47,3 +47,48 @@ eco xs = go 0 xs []
 function :: Int -> Char -> [Char]
 function 0 a = [a]
 function n a = a : function (n-1) a
+
+cambios :: Eq a => [a] -> [Int]
+cambios xs = [i | i <- [0..length xs - 2], xs !! i /= xs !! (i + 1)]
+
+oblongoNumber :: [Int]
+oblongoNumber = [i * (i+1) | i <- [0..100] ]
+
+abundantes :: [Int]
+abundantes = [i | i <- [0..100], i < sum(divisores i)]
+  where
+    divisores x = [i | i <- [1..x-1], x `mod` i == 0]
+
+euler :: Int -> Int
+euler n = sum [i | i <- [0..n-1], i `mod` 5 == 0 || i `mod` 3 == 0]
+
+expandir :: [Int] -> [Int]
+expandir xs = concat [replicate i i | i <- xs]
+
+map' :: (a -> b) -> [a] -> [b]
+map' f xs = foldr (\x acc ->  f x : acc) [] xs
+
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' f xs = foldr (\x acc -> if f x then x : acc else acc) [] xs
+
+unzip' :: [(a,b)] -> ([a],[b])
+unzip' xs = foldr (\(x,y) acc -> ((x:fst(acc)), (y:snd(acc)))) ([],[]) xs
+
+par2list :: (a,[b]) -> [(a,b)]
+par2list (x,ys) = foldr (\y acc -> (x,y):acc) [] ys
+
+maxSec :: [(Int, Int)] -> (Int, Int)
+maxSec xs = foldr (\(x,y) max -> if (y-x) > (snd(max)-fst(max)) then (x,y) else max) (head xs) xs
+
+maxL :: (Int, Int) -> (Int, Int) -> (Int, Int)
+maxL seg1 seg2 
+  | length1 >= length2 = seg1
+  | otherwise = seg2
+  where
+    length1 = abs (snd seg1 - fst seg1) -- Longitud del primer segmento
+    length2 = abs (snd seg2 - fst seg2) -- Longitud del segundo segmento
+
+-- Función principal que encuentra el segmento más largo en una lista de segmentos usando fold
+maxSec' :: [(Int, Int)] -> (Int, Int)
+maxSec' [] = error "La lista no puede estar vacía"
+maxSec' segments = foldl1 maxL segments -- Usa foldl1 para reducir la lista utilizando maxL
