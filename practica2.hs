@@ -203,8 +203,8 @@ rank Em = 0
 rank (N r _ _ _) = r
 
 makeH :: a -> Heap a -> Heap a -> Heap a
-makeH x a b = if rank a >= rank b then N (rank b + 1) x a b -- elijo el rango del arbol mas corto, porque ese es el rango del arbol que construyo
-                             else N (rank a + 1) x a b 
+makeH x a b = if rank a >= rank b then N (rank b + 1) x a b -- elijo el rango del arbol derecho
+                             else N (rank a + 1) x b a
 
 merge :: Ord a => Heap a -> Heap a -> Heap a
 merge h1 Em = h1
@@ -225,5 +225,14 @@ fromlist xs = fromList' (map convertir xs)
     fromList' [] = Em
     fromList' [h] = h
     fromList' (h1:h2:hs) = fromList' (merge h1 h2 : hs)
+
+fromList':: Ord a => [a] -> Heap a
+fromList' xs = let ys = map(\ x -> N 1 x E E)
+               pares [] = []
+               pares [h] = h
+               pares (x:y:hs) = merge x y : pares hs
+               g [h] = h
+               g hs = g(pares hs)
+               in g ys
     
 
