@@ -235,4 +235,3 @@ fromList' xs = let ys = map(\ x -> N 1 x E E)
                g hs = g(pares hs)
                in g ys
     
-
