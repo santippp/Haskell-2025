@@ -19,9 +19,10 @@ data Cmd = L | R deriving(Show , Eq)
 select :: [Cmd] -> Arb -> Arb
 select [] x = x
 select (x : xs) (Node a b) | x == L = select xs a
-                        | x == R = select xs b
+                           | x == R = select xs b
 
 enum :: Arb -> [[Cmd]]
+enum E = []
 enum (H _) = [[]]
 enum (Node a b) = [L : path | path <- enum a] ++ [R : path | path <- enum b]
 
@@ -61,7 +62,7 @@ checklheap :: Ord a => Heap a -> Bool
 checklheap Em = True
 checklheap h@(N _ x left right) = checkHeap h && rank left >= rank right && checklheap left && checklheap right
 
-ata Color = R | B deriving(Show, Eq)
+data Color = R | B deriving(Show, Eq)
 data RBT a = E | T Color (RBT a) a (RBT a) deriving(Show)
 
 prop1 :: RBT a -> Bool

@@ -141,7 +141,7 @@ balanceado x n =
 
 member' :: Ord a => a -> a -> Bin a -> Bool
 member' c x Hoja = c == x
-member' c x (Nodo l y r) | x > y = member' c x r
+member' c x (Nodo l y r) | x < y = member' c x r
                          | otherwise = member' y x l
 
 memberprime :: Ord a => a -> Bin a -> Bool
@@ -226,12 +226,12 @@ fromlist xs = fromList' (map convertir xs)
     fromList' [h] = h
     fromList' (h1:h2:hs) = fromList' (merge h1 h2 : hs)
 
-fromList':: Ord a => [a] -> Heap a
+{-fromList':: Ord a => [a] -> Heap a
 fromList' xs = let ys = map(\ x -> N 1 x E E)
-               pares [] = []
-               pares [h] = h
-               pares (x:y:hs) = merge x y : pares hs
-               g [h] = h
-               g hs = g(pares hs)
-               in g ys
-    
+                   pares [] = []
+                   pares [h] = h
+                   pares (x:y:hs) = merge x y : pares hs
+                   g [h] = h
+                   g hs = g(pares hs)
+              in g ys
+  -}
